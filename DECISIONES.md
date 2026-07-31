@@ -137,29 +137,59 @@ public static final Function<Producto, Producto> A_MAYUSCULAS =
 **4.1** Pega tu método `obtenerProductosComercializables()` completo.
 
 ```java
+public Flux<Producto> obtenerProductosComercializables() {
 
+    // fromCallable difiere la consulta al repositorio:
+    // la operación no se ejecuta hasta que alguien se suscribe al flujo.
+    return Mono.fromCallable(repository::findAll)
+
+            // JPA e Hibernate realizan operaciones bloqueantes.
+            // boundedElastic evita bloquear el event loop de Netty.
+            .subscribeOn(Schedulers.boundedElastic())
+
+            // Convierte la lista obtenida desde JPA en un Flux de entidades.
+            .flatMapMany(Flux::fromIterable)
+
+            // Convierte cada ProductoEntity al modelo de dominio inmutable Producto.
+            .map(ProductoMapper::toDominio)
+
+            // Crea una nueva instancia con el nombre en mayúsculas.
+            .map(ProductoFilters.A_MAYUSCULAS)
+
+            // Descarta productos con precio menor o igual a cero
+            // o sin correos de notificación.
+            .filter(ProductoFilters.IS_VALID)
+
+            // Registra por consola el id y el nombre sin modificar el producto.
+            .doOnNext(ProductoFilters.LOG_PRODUCTO)
+
+            // Si ningún producto supera el filtro, emite un producto genérico.
+            .defaultIfEmpty(PRODUCTO_GENERICO);
+}
 ```
 
 **4.2** ¿Qué pasa **exactamente** si eliminas
 `.subscribeOn(Schedulers.boundedElastic())` de ese método? Si lo probaste, indica qué
 hilo aparecía en el log antes y después.
 
->
+> Si elimino `subscribeOn(Schedulers.boundedElastic())`, la llamada bloqueante a `repository.findAll()` podría ejecutarse en el mismo hilo que atiende la petición en WebFlux. Como JPA e Hibernate usan JDBC y bloquean mientras esperan la respuesta de PostgreSQL, ese hilo no podría atender otras peticiones durante ese tiempo. En mi código uso `boundedElastic` para mover esa consulta a un hilo preparado para operaciones bloqueantes y evitar bloquear el event loop de Netty.
 
 **4.3** ¿Por qué `Mono.fromCallable(...)` y no `Mono.just(repository.findAll())`?
 (pista: cuándo se ejecuta cada uno)
 
->
+> Usé `Mono.fromCallable(repository::findAll)` porque la consulta no se ejecuta al crear el flujo, sino cuando alguien se suscribe. En cambio, con `Mono.just(repository.findAll())`, el método `findAll()` se ejecutaría inmediatamente antes de construir el `Mono`, por lo que la operación bloqueante ocurriría fuera del control del flujo reactivo.
 
 **4.4** En **tu** código, ¿dónde usaste `defaultIfEmpty` y dónde `switchIfEmpty`, y por
 qué no son intercambiables en esos dos lugares?
 
+> En `obtenerProductosComercializables()` usé `defaultIfEmpty(PRODUCTO_GENERICO)` porque, si ningún producto supera el filtro, quiero emitir un producto genérico como valor alternativo.
 >
+> En `buscarPorId(Long id)` usé `switchIfEmpty(Mono.error(new ProductoNoEncontradoException(id)))` porque, si el repositorio no encuentra el producto, quiero cambiar el flujo vacío por un error. No son intercambiables porque uno entrega un valor y el otro cambia el flujo a una señal de error.
 
 **4.5** ¿Por qué `doOnNext` no sirve para transformar el elemento, si aparentemente
 "recibe" el producto?
 
->
+> `doOnNext` recibe el producto únicamente para ejecutar un efecto secundario, en mi caso imprimir el id y el nombre con `ProductoFilters.LOG_PRODUCTO`. Aunque reciba el objeto, el operador devuelve el mismo elemento al flujo. Para transformar el producto utilicé `map(ProductoFilters.A_MAYUSCULAS)`, que sí devuelve una nueva instancia.
 
 ---
 
