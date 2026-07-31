@@ -299,29 +299,48 @@ PS C:\Users\HP\Documents\7MO\Programación deberes\agrosmart-final-quinteros> cu
 
 **7.1** Pega la salida real de tus pruebas (`./mvnw test` o `./gradlew test`).
 
+```text
+[INFO] Running ec.edu.espe.agrosmart.domain.ProductoFiltersTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.063 s -- in ec.edu.espe.agrosmart.domain.ProductoFiltersTest
+
+[INFO] Running ec.edu.espe.agrosmart.domain.ProductoTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in ec.edu.espe.agrosmart.domain.ProductoTest
+
+[INFO] Running ec.edu.espe.agrosmart.service.ProductoServiceTest
+Producto procesado -> ID: 1 | Nombre: ROSAS PREMIUM ECUATORIANAS
+Producto procesado -> ID: 2 | Nombre: ORQUÍDEAS BLANCAS
+Producto procesado -> ID: 3 | Nombre: GIRASOLES DE EXPORTACIÓN
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.091 s -- in ec.edu.espe.agrosmart.service.ProductoServiceTest
+
+[INFO] Running ec.edu.espe.agrosmart.service.PublicidadServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.066 s -- in ec.edu.espe.agrosmart.service.PublicidadServiceTest
+
+[INFO] Results:
+
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.182 s
+[INFO] Finished at: 2026-07-31T17:47:29-05:00
 ```
 
-```
+**7.2** ¿Cuántos productos espera tu `expectNextCount(...)` y por qué ese número concreto? Relaciónalo con tu semilla.
 
-**7.2** ¿Cuántos productos espera tu `expectNextCount(...)` y por qué ese número
-concreto? Relaciónalo con tu semilla.
+> En `ProductoServiceTest` utilicé `expectNextCount(3)` porque mi siembra tiene cinco productos: tres válidos y dos inválidos. El flujo filtra el producto con precio igual a cero y el producto sin correos, por lo que solo deben emitirse los tres productos comercializables.
 
->
+**7.3** ¿Por qué mockeaste `ProductoRepository` en lugar de dejar que la prueba consulte PostgreSQL?
 
-**7.3** ¿Por qué mockeaste `ProductoRepository` en lugar de dejar que la prueba consulte
-PostgreSQL?
+> Mockeé `ProductoRepository` para que las pruebas no dependan de PostgreSQL ni de Docker. De esta manera controlo exactamente qué devuelve `findAll()` y `findById()`, y puedo probar únicamente la lógica de `ProductoService`. También eliminé la prueba `AgrosmartApplicationTests`, porque `@SpringBootTest` intentaba levantar toda la aplicación y requería una conexión real a la base de datos.
 
->
+**7.4** ¿Qué demuestra `assertNotSame` que `assertEquals` **no** demuestra en tu prueba de copia defensiva?
 
-**7.4** ¿Qué demuestra `assertNotSame` que `assertEquals` **no** demuestra en tu prueba
-de copia defensiva?
+> `assertEquals` solo demuestra que dos listas contienen los mismos valores. `assertNotSame` demuestra que no son la misma instancia en memoria. En mi prueba confirma que `Producto` no conserva ni devuelve directamente la lista original, sino una copia defensiva.
 
->
+**7.5** ¿Por qué una prueba de un `Flux` que no llama a `verifyComplete()` (o a `verify()`) no está probando nada?
 
-**7.5** ¿Por qué una prueba de un `Flux` que no llama a `verifyComplete()` (o a
-`verify()`) no está probando nada?
-
->
+> Los flujos de Reactor son diferidos y no se ejecutan hasta que existe una suscripción. `verifyComplete()` y `verify()` hacen que `StepVerifier` se suscriba, ejecute el flujo y compruebe las expectativas. Sin esa llamada, las operaciones y verificaciones configuradas no llegarían a ejecutarse.
 
 ---
 
