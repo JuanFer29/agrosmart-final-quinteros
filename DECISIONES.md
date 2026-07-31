@@ -268,20 +268,32 @@ Publicidad no disponible en este momento (NombreDeLaExcepcion)
 
 **6.1** Pega la salida real de tus cuatro `curl`.
 
-```
+```text
+PS C:\Users\HP\Documents\7MO\Programación deberes\agrosmart-final-quinteros> curl.exe http://localhost:8117/api/productos
+[{"id":1,"nombre":"ROSAS PREMIUM ECUATORIANAS","categoria":"Flores","precioUsd":24.50,"correosNotificacion":["ventas@agrosmart.ec","compras@floristeria.ec"]},{"id":2,"nombre":"ORQUÍDEAS BLANCAS","categoria":"Flores","precioUsd":35.75,"correosNotificacion":["pedidos@agrosmart.ec"]},{"id":3,"nombre":"GIRASOLES DE EXPORTACIÓN","categoria":"Flores","precioUsd":18.90,"correosNotificacion":["ventas@agrosmart.ec"]}]
 
+PS C:\Users\HP\Documents\7MO\Programación deberes\agrosmart-final-quinteros> curl.exe http://localhost:8117/api/productos/1
+{"id":1,"nombre":"Rosas premium ecuatorianas","categoria":"Flores","precioUsd":24.50,"correosNotificacion":["ventas@agrosmart.ec","compras@floristeria.ec"]}
+
+PS C:\Users\HP\Documents\7MO\Programación deberes\agrosmart-final-quinteros> curl.exe -i http://localhost:8117/api/productos/9999
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Content-Length: 132
+
+{"timestamp":"2026-07-31T21:58:24.638+00:00","path":"/api/productos/9999","status":404,"error":"Not Found","requestId":"3fbcdd40-3"}
+
+PS C:\Users\HP\Documents\7MO\Programación deberes\agrosmart-final-quinteros> curl.exe "http://localhost:8117/api/agrosmart/publicidad?producto=Cacao%20fino%20de%20aroma&audiencia=exportadores%20europeos"
+"Descubre nuestro cacao fino de aroma: un placer único para el paladar europeo. ¡Exporta calidad!"
 ```
 
 **6.2** ¿Cómo lograste que el id inexistente responda **404** y no 500?
 
->
+> En `ProductoService.buscarPorId(Long id)` uso `switchIfEmpty` para emitir una `ProductoNoEncontradoException` cuando el repositorio devuelve un `Optional` vacío. En `ProductoNoEncontradoException` agregué `@ResponseStatus(HttpStatus.NOT_FOUND)`, por lo que WebFlux traduce esa excepción a una respuesta HTTP 404. La prueba con `/api/productos/9999` confirmó el resultado `HTTP/1.1 404 Not Found`.
 
 **6.3** ¿Qué pasaría si tu controlador devolviera `List<Producto>` en lugar de
 `Flux<Producto>`? ¿Seguiría compilando? ¿Seguiría siendo no bloqueante?
 
->
-
----
+> Podría compilar si cambiara también la implementación para construir una lista, pero dejaría de conservar la firma reactiva del endpoint. Para obtener esa lista normalmente tendría que esperar a que termine todo el flujo o usar una operación bloqueante, lo que rompería el enfoque no bloqueante de WebFlux. En mi controlador devuelvo directamente `Flux<Producto>` y `Mono<Producto>` para que los datos se procesen dentro del flujo reactivo sin usar `block()`.
 
 ## Fase 7 — Pruebas unitarias
 
