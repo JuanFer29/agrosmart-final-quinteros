@@ -6,11 +6,11 @@
 >
 > Completa **todos** los campos. El código del examen ya viene escrito: no lo cambies.
 
-- **Nombre completo:**
-- **Cédula:**
-- **NRC:**
+- **Nombre completo:** Juan Fernando Quinteros Saguma
+- **Cédula:** 1750253617
+- **NRC:** 30405
 - **Código del examen:** `AGSK-2026`
-- **Fecha y hora de inicio:**      <!-- formato: 2026-XX-XX HH:MM -->
+- **Fecha y hora de inicio:** 2026-07-30 20:07
 
 ---
 
@@ -21,11 +21,11 @@ se busca en una tabla.
 
 | # | Parámetro | Cómo se obtiene | Mi valor |
 |:---:|-----------|-----------------|----------|
-| — | `NN` | los 2 últimos dígitos de mi cédula | |
-| 1 | Nombre de la tabla | `tbl_productos_base_` + `NN` | |
-| 2 | Puerto | `81` + `NN` | |
-| 3 | Categoría | según el **último dígito** (tabla de abajo) | |
-| — | Audiencia para el prompt de IA | según la categoría | |
+| — | `NN` | los 2 últimos dígitos de mi cédula | `17` |
+| 1 | Nombre de la tabla | `tbl_productos_base_` + `NN` | `tbl_productos_base_17` |
+| 2 | Puerto | `81` + `NN` | `8117` |
+| 3 | Categoría | según el **último dígito** (tabla de abajo) | Flores |
+| — | Audiencia para el prompt de IA | según la categoría | floristerías premium |
 
 **Tabla de categorías:**
 
@@ -57,8 +57,8 @@ se busca en una tabla.
 > haberlo entregado y C8 se califica en nivel 1.
 
 - **Enlace al video (5 min, cámara + pantalla):**
-- **Plataforma:**                  <!-- Drive institucional / OneDrive / YouTube no listado -->
-- **Acceso verificado en incógnito:**   ☐ Sí
+- **Plataforma:**
+- **Acceso verificado en incógnito:** ☐ Sí
 - **Duración real:**
 
 ---
@@ -69,4 +69,4 @@ Declaro que este repositorio es de mi autoría individual, que sustentaré oralm
 decisión de diseño que contiene, y que el historial de commits refleja fielmente el
 proceso de desarrollo que realicé.
 
-**Firma (nombre completo):**
+**Firma (nombre completo):** Juan Fernando Quinteros Saguma
