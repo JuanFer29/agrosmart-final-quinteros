@@ -198,30 +198,69 @@ qué no son intercambiables en esos dos lugares?
 **5.1** Pega tu interfaz `AgroSmartAIService` completa.
 
 ```java
+package ec.edu.espe.agrosmart.ai;
 
+import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.V;
+import dev.langchain4j.service.spring.AiService;
+
+@AiService
+public interface AgroSmartAIService {
+
+    @UserMessage("""
+            Redacta una frase publicitaria de máximo 100 caracteres para vender \
+            {{producto}} dirigido a {{audiencia}}.
+            """)
+    String generarPublicidad(
+            @V("producto") String producto,
+            @V("audiencia") String audiencia
+    );
+}
 ```
 
-**5.2** ¿Qué hace `@V("producto")` y qué pasaría si lo quitaras dejando solo el
-parámetro?
+**5.2** ¿Qué hace `@V("producto")` y qué pasaría si lo quitaras dejando solo el parámetro?
 
+> `@V("producto")` relaciona el parámetro `producto` del método con la variable `{{producto}}` que aparece en el prompt. Si quitara esa anotación y dejara solo el parámetro, LangChain4j no tendría el mapeo explícito entre el argumento y la variable del mensaje, por lo que el prompt podría no completarse correctamente.
+
+**5.3** ¿En qué archivo y con qué líneas configuraste el modelo? ¿Por qué **no** hizo falta declarar un `@Bean`?
+
+> Configuré el modelo en `src/main/resources/application-prod.properties` con estas líneas:
 >
-
-**5.3** ¿En qué archivo y con qué líneas configuraste el modelo? ¿Por qué **no** hizo
-falta declarar un `@Bean`?
-
+> ```properties
+> langchain4j.open-ai.chat-model.api-key=demo
+> langchain4j.open-ai.chat-model.model-name=gpt-4o-mini
+> langchain4j.open-ai.chat-model.timeout=30s
+> langchain4j.open-ai.chat-model.log-requests=true
+> langchain4j.open-ai.chat-model.log-responses=true
+> logging.level.dev.langchain4j=DEBUG
+> ```
 >
+> No declaré un `@Bean` porque los starters `langchain4j-spring-boot-starter` y `langchain4j-open-ai-spring-boot-starter` realizan la autoconfiguración a partir de esas propiedades. En el arranque se mostró que Spring detectó `AgroSmartAIService` como componente de IA.
 
-**5.4** ¿Por qué la llamada a la IA también necesita `boundedElastic`, si no es una
-consulta a base de datos?
+**5.4** ¿Por qué la llamada a la IA también necesita `boundedElastic`, si no es una consulta a base de datos?
 
->
+> La llamada a `aiService.generarPublicidad(...)` realiza una petición HTTP al proveedor y espera su respuesta, por lo que también puede bloquear el hilo. En mi método `generarPublicidad` la envolví con `Mono.fromCallable(...)` y la ejecuté con `subscribeOn(Schedulers.boundedElastic())` para no bloquear el event loop de Netty. Además agregué un `timeout` de 30 segundos.
 
-**5.5** Si tu proveedor devolvió un error durante el examen, pega el mensaje real y la
-respuesta que produjo tu `onErrorResume`.
+**5.5** Si tu proveedor devolvió un error durante el examen, pega el mensaje real y la respuesta que produjo tu `onErrorResume`.
 
+```text
+Durante esta fase no se invocó todavía el proveedor desde un endpoint, por lo que no obtuve un error real del modelo.
+
+Respuesta preparada por onErrorResume:
+Publicidad no disponible en este momento (NombreDeLaExcepcion)
 ```
 
-```
+> En `ProductoService`, cualquier error de red, cuota o timeout se convierte en una respuesta controlada con:
+>
+> ```java
+> .onErrorResume(error -> Mono.just(
+>         "Publicidad no disponible en este momento ("
+>                 + error.getClass().getSimpleName()
+>                 + ")"
+> ));
+> ```
+
+
 
 ---
 
