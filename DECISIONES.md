@@ -17,10 +17,10 @@
 
 ## Datos
 
-- **Nombre:**
-- **Cédula:**
-- **NN (dos últimos dígitos):**
-- **Categoría asignada (según el último dígito):**
+- **Nombre:** Juan Fernando Quinteros Saguma
+- **Cédula:** 1750253617
+- **NN (dos últimos dígitos):** 17
+- **Categoría asignada (según el último dígito):** Flores
 
 ---
 
@@ -28,23 +28,27 @@
 
 **1.1** ¿Qué archivo activa el perfil `prod` y qué línea exacta lo hace?
 
+> El archivo es `src/main/resources/application.properties` y la línea que activa el perfil es:
 >
+> `spring.profiles.active=prod`
 
 **1.2** Pega la línea del log de arranque donde se ve tu puerto y el perfil activo.
 
-```
+```text
+2026-07-31T09:27:32.637-05:00  INFO 5768 --- [agrosmart] [           main] e.e.espe.agrosmart.AgrosmartApplication  : The following 1 profile is active: "prod"
 
+2026-07-31T09:27:38.265-05:00  INFO 5768 --- [agrosmart] [           main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8117 (http)
 ```
 
 **1.3** ¿Qué habría pasado si dejabas `ddl-auto=create-drop` en lugar de `update`?
 Responde pensando en tus datos sembrados.
 
->
+> Si hubiera dejado `create-drop`, la tabla y los datos sembrados se eliminarían cada vez que se cierre la aplicación. Configuré `update` para conservar la información entre cada ejecución y no tener que volver a crear los registros.
 
 **1.4** ¿Levantaste PostgreSQL con `compose.yaml` (Opción A) o con una instalación local
 (Opción B)? ¿Qué ventaja tiene la que elegiste?
 
->
+> Utilicé la Opción A con `compose.yaml`. Me pareció más práctico porque Spring Boot puede conectarse directamente al contenedor de PostgreSQL sin hacer una instalación local. Durante la configuración apareció un problema de codificación en `application-prod.properties`, ya que estaba en `ISO-8859-1` y Maven mostraba un `MalformedInputException`. Después de guardarlo nuevamente en UTF-8, la aplicación inició correctamente en el puerto `8117`.
 
 ---
 
