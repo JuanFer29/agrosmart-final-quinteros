@@ -88,30 +88,47 @@ lo fuera? (piensa en la restricción `unique` de `nombre_producto`)
 
 > La siembra se ejecuta solamente cuando `repository.count() == 0`, por lo que los productos solo se insertan una vez. Si esa validación no existiera, en el siguiente arranque intentaría volver a insertar los mismos productos y se produciría un error porque `nombre_producto` tiene una restricción `UNIQUE`.
 
+---
+
 ## Fase 3 — Modelo inmutable y lógica funcional
 
 **3.1** ¿Por qué tienes **dos** clases (`ProductoEntity` y `Producto`) en lugar de una?
 ¿Qué te impide hacer inmutable directamente la entidad de Hibernate?
 
->
+> Utilicé `ProductoEntity` para la persistencia con JPA e Hibernate, porque esa clase necesita un constructor vacío y setters para que Hibernate pueda crear y cargar los datos desde PostgreSQL. En cambio, `Producto` es mi modelo de dominio inmutable, con atributos `private final`, sin setters y con todos sus valores asignados desde el constructor.
 
 **3.2** Escribe el código exacto de **tus dos** copias defensivas e indica en qué línea
 está cada una.
 
 ```java
+// Copia defensiva de entrada, dentro del constructor de Producto
+this.correosNotificacion = new ArrayList<>(correosNotificacion);
 
+// Copia defensiva de salida, dentro de getCorreosNotificacion()
+return Collections.unmodifiableList(
+        new ArrayList<>(correosNotificacion)
+);
 ```
 
 **3.3** ¿Por qué la copia defensiva **solo en el getter** no sería suficiente? Describe
 el ataque concreto que quedaría abierto sobre **tu** clase.
 
->
+> Si solo hiciera la copia en el getter, la lista que entra al constructor seguiría siendo la misma referencia que conserva el objeto. Por ejemplo, después de crear un `Producto`, otra parte del programa podría modificar la lista original agregando o eliminando correos y cambiar indirectamente el estado interno del producto. La copia defensiva del constructor evita ese problema.
 
 **3.4** ¿Cómo implementaste `A_MAYUSCULAS` para no mutar el `Producto` recibido?
 
 ```java
-
+public static final Function<Producto, Producto> A_MAYUSCULAS =
+        producto -> new Producto(
+                producto.getId(),
+                producto.getNombre().toUpperCase(),
+                producto.getCategoria(),
+                producto.getPrecioUsd(),
+                producto.getCorreosNotificacion()
+        );
 ```
+
+> La función no modifica el objeto recibido. Crea una nueva instancia de `Producto` con el nombre en mayúsculas y conserva los demás valores del producto original.
 
 ---
 
