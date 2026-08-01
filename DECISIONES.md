@@ -244,9 +244,9 @@ public interface AgroSmartAIService {
 **5.5** Si tu proveedor devolvió un error durante el examen, pega el mensaje real y la respuesta que produjo tu `onErrorResume`.
 
 ```text
-Durante esta fase no se invocó todavía el proveedor desde un endpoint, por lo que no obtuve un error real del modelo.
+Durante las pruebas el proveedor respondió correctamente, por lo que no se produjo un error real del modelo.
 
-Respuesta preparada por onErrorResume:
+Si hubiera ocurrido un error de red, timeout o cuota, la respuesta preparada por onErrorResume habría sido:
 Publicidad no disponible en este momento (NombreDeLaExcepcion)
 ```
 
@@ -348,21 +348,29 @@ Producto procesado -> ID: 3 | Nombre: GIRASOLES DE EXPORTACIÓN
 
 **8.1** Pega tu `git log --oneline --graph --all`.
 
-```
-
+```text
+* 2c43f25 (HEAD -> feature/pruebas) test: agrega pruebas del modelo, logica funcional, flujo reactivo e ia
+* d8ca52f (feature/api-reactiva) feat: expone endpoints reactivos y de publicidad
+* 3f1aa92 (feature/ia-langchain4j) feat: integra langchain4j para publicidad de productos
+* b4a0b86 (feature/servicio-reactivo) feat: implementa servicio reactivo con boundedElastic y operadores
+* ff97cfd (feature/modelo-inmutable) feat: agrega modelo inmutable de producto y logica funcional
+* 4fbbba3 (feature/persistencia-jpa) feat: agrega entidad jpa de productos y siembra de datos
+* cf7dd6f (feature/config-perfiles) chore: configura perfil prod con postgresql y puerto propio
+* 954be94 (origin/main, origin/HEAD, main) chore: inicializa proyecto agrosmart con webflux, jpa y langchain4j
+* 643b921 chore: registra identidad del examen
 ```
 
 **8.2** ¿Qué fase te tomó más tiempo del previsto y por qué?
 
->
+> La fase que más tiempo me tomó fue la Fase 7 de pruebas unitarias. Aunque las pruebas no eran muy largas, me tocó hacer varias clases, corregir errores que iban saliendo y también eliminar AgrosmartApplicationTests porque hacía que intentara levantar toda la aplicación y por eso no corrían las pruebas. Al final ya pude hacer que las 11 pruebas pasaran correctamente y saliera BUILD SUCCESS.
 
 **8.3** Si tuvieras 30 minutos más, ¿qué mejorarías **primero** de tu entrega y por qué
 esa y no otra?
 
->
+> Si hubiera tenido 30 minutos más, habría hecho más pruebas para revisar otros casos que podían pasar en el servicio, por ejemplo probar más búsquedas por id, otros errores que pudiera devolver la IA o algunos casos diferentes del flujo reactivo. Preferiría mejorar esa parte porque el proyecto ya funciona y tener más pruebas ayuda a comprobar que todo siga funcionando si después se hacen cambios.
 
 **8.4** Declara honestamente qué herramientas consultaste durante el examen
 (documentación, apuntes, asistentes de IA) y para qué. **Esta declaración no descuenta
 puntaje**; su omisión o falsedad sí constituye falta de honestidad académica.
 
->
+> Durante el examen revisé el enunciado varias veces para ir comparando lo que pedía con lo que iba haciendo. También revisé algunos trabajos anteriores de la materia porque varias cosas eran parecidas y me servían como guía para adaptar el código y demorarme menos. Además utilicé ChatGPT para entender algunos errores que fueron saliendo mientras desarrollaba las fases, especialmente al momento de compilar, ya que muchas veces no compilaba y no sabía el motivo. También me ayudó a corregir o rehacer algunas partes del código cuando no encontraba el error por mi cuenta, como el problema que tuve con el file encoding, ya que no entendía por qué no podía cambiar esa configuración.
