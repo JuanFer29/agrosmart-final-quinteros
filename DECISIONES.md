@@ -244,9 +244,9 @@ public interface AgroSmartAIService {
 **5.5** Si tu proveedor devolvió un error durante el examen, pega el mensaje real y la respuesta que produjo tu `onErrorResume`.
 
 ```text
-Durante esta fase no se invocó todavía el proveedor desde un endpoint, por lo que no obtuve un error real del modelo.
+Durante las pruebas el proveedor respondió correctamente, por lo que no se produjo un error real del modelo.
 
-Respuesta preparada por onErrorResume:
+Si hubiera ocurrido un error de red, timeout o cuota, la respuesta preparada por onErrorResume habría sido:
 Publicidad no disponible en este momento (NombreDeLaExcepcion)
 ```
 
@@ -299,29 +299,48 @@ PS C:\Users\HP\Documents\7MO\Programación deberes\agrosmart-final-quinteros> cu
 
 **7.1** Pega la salida real de tus pruebas (`./mvnw test` o `./gradlew test`).
 
+```text
+[INFO] Running ec.edu.espe.agrosmart.domain.ProductoFiltersTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.063 s -- in ec.edu.espe.agrosmart.domain.ProductoFiltersTest
+
+[INFO] Running ec.edu.espe.agrosmart.domain.ProductoTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in ec.edu.espe.agrosmart.domain.ProductoTest
+
+[INFO] Running ec.edu.espe.agrosmart.service.ProductoServiceTest
+Producto procesado -> ID: 1 | Nombre: ROSAS PREMIUM ECUATORIANAS
+Producto procesado -> ID: 2 | Nombre: ORQUÍDEAS BLANCAS
+Producto procesado -> ID: 3 | Nombre: GIRASOLES DE EXPORTACIÓN
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.091 s -- in ec.edu.espe.agrosmart.service.ProductoServiceTest
+
+[INFO] Running ec.edu.espe.agrosmart.service.PublicidadServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.066 s -- in ec.edu.espe.agrosmart.service.PublicidadServiceTest
+
+[INFO] Results:
+
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.182 s
+[INFO] Finished at: 2026-07-31T17:47:29-05:00
 ```
 
-```
+**7.2** ¿Cuántos productos espera tu `expectNextCount(...)` y por qué ese número concreto? Relaciónalo con tu semilla.
 
-**7.2** ¿Cuántos productos espera tu `expectNextCount(...)` y por qué ese número
-concreto? Relaciónalo con tu semilla.
+> En `ProductoServiceTest` utilicé `expectNextCount(3)` porque mi siembra tiene cinco productos: tres válidos y dos inválidos. El flujo filtra el producto con precio igual a cero y el producto sin correos, por lo que solo deben emitirse los tres productos comercializables.
 
->
+**7.3** ¿Por qué mockeaste `ProductoRepository` en lugar de dejar que la prueba consulte PostgreSQL?
 
-**7.3** ¿Por qué mockeaste `ProductoRepository` en lugar de dejar que la prueba consulte
-PostgreSQL?
+> Mockeé `ProductoRepository` para que las pruebas no dependan de PostgreSQL ni de Docker. De esta manera controlo exactamente qué devuelve `findAll()` y `findById()`, y puedo probar únicamente la lógica de `ProductoService`. También eliminé la prueba `AgrosmartApplicationTests`, porque `@SpringBootTest` intentaba levantar toda la aplicación y requería una conexión real a la base de datos.
 
->
+**7.4** ¿Qué demuestra `assertNotSame` que `assertEquals` **no** demuestra en tu prueba de copia defensiva?
 
-**7.4** ¿Qué demuestra `assertNotSame` que `assertEquals` **no** demuestra en tu prueba
-de copia defensiva?
+> `assertEquals` solo demuestra que dos listas contienen los mismos valores. `assertNotSame` demuestra que no son la misma instancia en memoria. En mi prueba confirma que `Producto` no conserva ni devuelve directamente la lista original, sino una copia defensiva.
 
->
+**7.5** ¿Por qué una prueba de un `Flux` que no llama a `verifyComplete()` (o a `verify()`) no está probando nada?
 
-**7.5** ¿Por qué una prueba de un `Flux` que no llama a `verifyComplete()` (o a
-`verify()`) no está probando nada?
-
->
+> Los flujos de Reactor son diferidos y no se ejecutan hasta que existe una suscripción. `verifyComplete()` y `verify()` hacen que `StepVerifier` se suscriba, ejecute el flujo y compruebe las expectativas. Sin esa llamada, las operaciones y verificaciones configuradas no llegarían a ejecutarse.
 
 ---
 
@@ -329,21 +348,29 @@ de copia defensiva?
 
 **8.1** Pega tu `git log --oneline --graph --all`.
 
-```
-
+```text
+* 2c43f25 (HEAD -> feature/pruebas) test: agrega pruebas del modelo, logica funcional, flujo reactivo e ia
+* d8ca52f (feature/api-reactiva) feat: expone endpoints reactivos y de publicidad
+* 3f1aa92 (feature/ia-langchain4j) feat: integra langchain4j para publicidad de productos
+* b4a0b86 (feature/servicio-reactivo) feat: implementa servicio reactivo con boundedElastic y operadores
+* ff97cfd (feature/modelo-inmutable) feat: agrega modelo inmutable de producto y logica funcional
+* 4fbbba3 (feature/persistencia-jpa) feat: agrega entidad jpa de productos y siembra de datos
+* cf7dd6f (feature/config-perfiles) chore: configura perfil prod con postgresql y puerto propio
+* 954be94 (origin/main, origin/HEAD, main) chore: inicializa proyecto agrosmart con webflux, jpa y langchain4j
+* 643b921 chore: registra identidad del examen
 ```
 
 **8.2** ¿Qué fase te tomó más tiempo del previsto y por qué?
 
->
+> La fase que más tiempo me tomó fue la Fase 7 de pruebas unitarias. Aunque las pruebas no eran muy largas, me tocó hacer varias clases, corregir errores que iban saliendo y también eliminar AgrosmartApplicationTests porque hacía que intentara levantar toda la aplicación y por eso no corrían las pruebas. Al final ya pude hacer que las 11 pruebas pasaran correctamente y saliera BUILD SUCCESS.
 
 **8.3** Si tuvieras 30 minutos más, ¿qué mejorarías **primero** de tu entrega y por qué
 esa y no otra?
 
->
+> Si hubiera tenido 30 minutos más, habría hecho más pruebas para revisar otros casos que podían pasar en el servicio, por ejemplo probar más búsquedas por id, otros errores que pudiera devolver la IA o algunos casos diferentes del flujo reactivo. Preferiría mejorar esa parte porque el proyecto ya funciona y tener más pruebas ayuda a comprobar que todo siga funcionando si después se hacen cambios.
 
 **8.4** Declara honestamente qué herramientas consultaste durante el examen
 (documentación, apuntes, asistentes de IA) y para qué. **Esta declaración no descuenta
 puntaje**; su omisión o falsedad sí constituye falta de honestidad académica.
 
->
+> Durante el examen revisé el enunciado varias veces para ir comparando lo que pedía con lo que iba haciendo. También revisé algunos trabajos anteriores de la materia porque varias cosas eran parecidas y me servían como guía para adaptar el código y demorarme menos. Además utilicé ChatGPT para entender algunos errores que fueron saliendo mientras desarrollaba las fases, especialmente al momento de compilar, ya que muchas veces no compilaba y no sabía el motivo. También me ayudó a corregir o rehacer algunas partes del código cuando no encontraba el error por mi cuenta, como el problema que tuve con el file encoding, ya que no entendía por qué no podía cambiar esa configuración.

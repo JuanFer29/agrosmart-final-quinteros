@@ -60,7 +60,9 @@ se busca en una tabla.
 - **Plataforma:**
 - **Acceso verificado en incógnito:** ☐ Sí
 - **Duración real:**
+## Video de defensa
 
+https://drive.google.com/file/d/1RCw-8hKOMOfXiqB0xV4vEZ79XYvoopPH/view?usp=sharing
 ---
 
 ## Declaración
